@@ -29,15 +29,13 @@ export default function Sidebar({ discovered, onAddElement }: SidebarProps) {
             key={el.id} 
             className={styles.item}
             onClick={() => onAddElement(el)}
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData('elementId', el.id);
+              e.dataTransfer.dropEffect = 'copy';
+            }}
           >
-            <div 
-              className={styles.itemIcon}
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData('elementId', el.id);
-                e.dataTransfer.dropEffect = 'copy';
-              }}
-            >
+            <div className={styles.itemIcon}>
               {el.emoji ? (
                 <span>{el.emoji}</span>
               ) : el.svg ? (

@@ -6,11 +6,12 @@ import styles from './Canvas.module.css';
 
 interface CanvasProps {
   activeElements: CanvasElement[];
+  discovered: Element[];
   setActiveElements: React.Dispatch<React.SetStateAction<CanvasElement[]>>;
   onCombine: (el1: CanvasElement, el2: CanvasElement) => void;
 }
 
-export default function Canvas({ activeElements, setActiveElements, onCombine }: CanvasProps) {
+export default function Canvas({ activeElements, discovered, setActiveElements, onCombine }: CanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [draggingInstance, setDraggingInstance] = useState<string | null>(null);
 
@@ -36,10 +37,11 @@ export default function Canvas({ activeElements, setActiveElements, onCombine }:
       }
     } else if (elementId) {
       // New element added from sidebar
-      const baseEl = BASE_ELEMENTS.find(el => el.id === elementId);
-      if (baseEl) {
+      const allPossible = [...BASE_ELEMENTS, ...discovered];
+      const foundEl = allPossible.find(el => el.id === elementId);
+      if (foundEl) {
         const newInstance: CanvasElement = {
-          ...baseEl,
+          ...foundEl,
           instanceId: Math.random().toString(36).substr(2, 9),
           x,
           y
@@ -77,29 +79,31 @@ export default function Canvas({ activeElements, setActiveElements, onCombine }:
         Combine the elements to discover secrets...
       </div>
       
-      {activeElements.map((el) => (
+       {activeElements.map((el) => (
         <div
           key={el.instanceId}
           className={styles.element}
           style={{ 
             transform: `translate(${el.x}px, ${el.y}px)`,
-            opacity: draggingInstance === el.instanceId ? 0 : 1, // HIDE REMNANT
+            opacity: draggingInstance === el.instanceId ? 0 : 1,
             pointerEvents: draggingInstance === el.instanceId ? 'none' : 'auto'
           }}
+          draggable
+          onDragStart={(e) => {
+            e.dataTransfer.setData('instanceId', el.instanceId);
+            setDraggingInstance(el.instanceId);
+            // Use a custom drag image to avoid the "ghosting" look of the whole div
+            const icon = e.currentTarget.querySelector(`.${styles.elementIcon}`);
+            if (icon) {
+              e.dataTransfer.setDragImage(icon, 32, 32);
+            }
+          } }
+          onDragEnd={() => setDraggingInstance(null)}
           onDoubleClick={() => {
             setActiveElements(prev => prev.filter(item => item.instanceId !== el.instanceId));
           }}
         >
-          <div 
-            className={styles.elementIcon}
-            draggable
-            onDragStart={(e) => {
-              e.dataTransfer.setData('instanceId', el.instanceId);
-              setDraggingInstance(el.instanceId);
-              e.dataTransfer.setDragImage(e.currentTarget, 32, 32);
-            }}
-            onDragEnd={() => setDraggingInstance(null)}
-          >
+          <div className={styles.elementIcon}>
             {el.emoji ? (
               <span>{el.emoji}</span>
             ) : el.svg ? (
@@ -111,7 +115,6 @@ export default function Canvas({ activeElements, setActiveElements, onCombine }:
               el.name[0]
             )}
           </div>
-          {/* Element name removed for minimalist canvas */}
         </div>
       ))}
 

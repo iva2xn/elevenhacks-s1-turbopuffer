@@ -42,6 +42,13 @@ export default function Home() {
       if (data.result) {
         const resultElement: Element = data.result;
 
+        // Play sound if available
+        if (resultElement.sound) {
+          const audio = new Audio(resultElement.sound);
+          audio.volume = 0.5;
+          audio.play().catch(e => console.warn('Sound playback failed:', e));
+        }
+
         // Remove the original elements
         setActiveElements(prev => prev.filter(
           el => el.instanceId !== el1.instanceId && el.instanceId !== el2.instanceId
@@ -79,6 +86,7 @@ export default function Home() {
       />
       <Canvas
         activeElements={activeElements}
+        discovered={discovered}
         setActiveElements={setActiveElements}
         onCombine={handleCombine}
       />

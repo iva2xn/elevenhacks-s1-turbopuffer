@@ -5,6 +5,7 @@ export interface Element {
   image?: string;
   emoji?: string;
   svg?: string;
+  sound?: string;
   isBase?: boolean;
   discoveredAt?: number;
 }

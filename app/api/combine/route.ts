@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCachedCombination, saveCombination } from '@/lib/db';
 import { generateCombination } from '@/lib/ai';
+import { generateSound } from '@/lib/elevenlabs';
 import { Element } from '@/lib/types';
 
 export async function POST(req: NextRequest) {
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ result: cached, cached: true });
     }
 
-    // 2. Call AI — this ALWAYS returns a result (never null)
+    // 2. Call AI
     const generated = await generateCombination(elementA, elementB, usedIcons);
 
     const newElement: Element = {
@@ -29,7 +30,15 @@ export async function POST(req: NextRequest) {
       discoveredAt: Date.now()
     };
 
-    // 3. Save to cache
+    // 3. Generate sound effect
+    if (generated.soundPrompt) {
+      const soundUrl = await generateSound(newElement.id, generated.soundPrompt);
+      if (soundUrl) {
+        newElement.sound = soundUrl;
+      }
+    }
+
+    // 4. Save to cache
     await saveCombination(elementA, elementB, newElement);
 
     return NextResponse.json({ result: newElement, cached: false });
