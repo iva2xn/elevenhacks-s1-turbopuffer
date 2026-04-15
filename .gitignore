@@ -41,3 +41,6 @@ gcp-key.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated sounds
+/public/sounds

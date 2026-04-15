@@ -39,6 +39,7 @@ export default function Home() {
   const [discoveryElement, setDiscoveryElement] = useState<Element | null>(null);
   const [currentFact, setCurrentFact] = useState(FUN_FACTS[0]);
   const [isExplaining, setIsExplaining] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (isCombining) {
@@ -134,6 +135,12 @@ export default function Home() {
     if (!discoveryElement || isExplaining) return;
     setIsExplaining(true);
     
+    // Stop any current audio
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+
     try {
       const response = await fetch('/api/explain', {
         method: 'POST',
@@ -148,6 +155,11 @@ export default function Home() {
       if (data.songUrl) {
         const audio = new Audio(data.songUrl);
         audio.play();
+        setCurrentAudio(audio);
+
+        // Update discovery element locally so UI can show download / lyrics
+        setDiscoveryElement(prev => prev ? { ...prev, explanationSong: data.songUrl } : null);
+
         // Update discovered state with the song URL
         setDiscovered(prev => prev.map(d => 
           d.id === discoveryElement.id ? { ...d, explanationSong: data.songUrl } : d
@@ -157,6 +169,26 @@ export default function Home() {
       console.error('Explain failed:', err);
     } finally {
       setIsExplaining(false);
+    }
+  };
+
+  const handleDismissDiscovery = () => {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+    }
+
+    if (discoveryElement) {
+      const midX = window.innerWidth / 2;
+      const midY = window.innerHeight / 2;
+      setActiveElements(prev => [...prev, {
+        ...discoveryElement,
+        instanceId: Math.random().toString(36).substr(2, 9),
+        x: midX - 250,
+        y: midY - 100
+      }]);
+      setDiscoveryElement(null);
     }
   };
 
@@ -245,39 +277,46 @@ export default function Home() {
             "{discoveryElement.description}"
           </p>
           
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {!discoveryElement.explanationSong ? (
+              <button 
+                onClick={handleExplain}
+                disabled={isExplaining}
+                style={{
+                  padding: '1.2rem 2.5rem', background: '#F8F4EE', color: '#1B1411',
+                  borderRadius: '8px', fontSize: '1rem', fontWeight: 700,
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.5)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  cursor: 'pointer', border: 'none'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-5px)';
+                  e.currentTarget.style.boxShadow = '0 15px 40px rgba(0,0,0,0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+                }}
+              >
+                {isExplaining ? 'COMPOSING SONG...' : 'EXPLAIN'}
+              </button>
+            ) : (
+              <a 
+                href={discoveryElement.explanationSong}
+                download={`${discoveryElement.name}-song.mp3`}
+                style={{
+                  padding: '1.2rem 2.5rem', background: '#4CAF50', color: '#fff',
+                  borderRadius: '8px', fontSize: '1rem', fontWeight: 700,
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.3)', transition: 'all 0.3s',
+                  cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                DOWNLOAD SONG
+              </a>
+            )}
             <button 
-              onClick={handleExplain}
-              disabled={isExplaining}
-              style={{
-                padding: '1.2rem 2.5rem', background: '#F8F4EE', color: '#1B1411',
-                borderRadius: '8px', fontSize: '1rem', fontWeight: 700,
-                boxShadow: '0 10px 30px rgba(0,0,0,0.5)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                cursor: 'pointer', border: 'none'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-5px)';
-                e.currentTarget.style.boxShadow = '0 15px 40px rgba(0,0,0,0.6)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
-              }}
-            >
-              {isExplaining ? 'COMPOSING SONG...' : 'EXPLAIN'}
-            </button>
-            <button 
-              onClick={() => {
-                const midX = window.innerWidth / 2;
-                const midY = window.innerHeight / 2;
-                setActiveElements(prev => [...prev, {
-                  ...discoveryElement,
-                  instanceId: Math.random().toString(36).substr(2, 9),
-                  x: midX - 250,
-                  y: midY - 100
-                }]);
-                setDiscoveryElement(null);
-              }}
+              onClick={handleDismissDiscovery}
               style={{
                 padding: '1.2rem 2.5rem', background: 'transparent', color: '#F8F4EE',
                 border: '1px solid rgba(248, 244, 238, 0.3)', borderRadius: '8px', fontSize: '1rem',

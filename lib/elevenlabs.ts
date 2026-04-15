@@ -26,7 +26,7 @@ export async function generateSound(id: string, prompt: string): Promise<string 
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('ElevenLabs sound generation failed:', errorText);
+      console.error(`[ElevenLabs] Sound generation failed (Status ${response.status}):`, errorText);
       return null;
     }
 
@@ -47,43 +47,86 @@ export async function generateSound(id: string, prompt: string): Promise<string 
     return null;
   }
 }
-export async function generateExplanation(id: string, text: string): Promise<string | null> {
+export async function generateMusic(id: string, prompt: string): Promise<string | null> {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (!apiKey) return null;
 
-  console.log(`[ElevenLabs] Generating explanation for: ${id}`);
+  console.log(`[ElevenLabs] Generating music for: ${id} with prompt: ${prompt}`);
 
   try {
-    const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/jsCq9Anv6qn9G4e2w1Yw', { // Use a fun voice ID
+    const response = await fetch('https://api.elevenlabs.io/v1/sound-generation', {
       method: 'POST',
       headers: {
         'xi-api-key': apiKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        text,
-        model_id: 'eleven_multilingual_v2',
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75,
-        },
+        text: prompt,
+        duration_seconds: 10.0, // Longer for music
+        prompt_influence: 0.7,
       }),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[ElevenLabs] Music generation failed (Status ${response.status}):`, errorText);
+      return null;
+    }
 
     const buffer = await response.arrayBuffer();
-    const fileName = `explain-${id}-${Date.now()}.mp3`;
+    const fileName = `music-${id}-${Date.now()}.mp3`;
     const soundsDir = path.join(process.cwd(), 'public', 'sounds');
     
-    if (!fs.existsSync(soundsDir)) fs.mkdirSync(soundsDir, { recursive: true });
+    if (!fs.existsSync(soundsDir)) {
+      fs.mkdirSync(soundsDir, { recursive: true });
+    }
 
     const filePath = path.join(soundsDir, fileName);
     fs.writeFileSync(filePath, Buffer.from(buffer));
     
     return `/sounds/${fileName}`;
   } catch (error) {
-    console.error('Error in generateExplanation:', error);
+    console.error('Error in generateMusic:', error);
+    return null;
+  }
+}
+
+export async function generateMusicV2(id: string, compositionPlan: any): Promise<string | null> {
+  const apiKey = process.env.ELEVENLABS_API_KEY;
+  if (!apiKey) return null;
+
+  console.log(`[ElevenLabs] Generating full song for: ${id}`);
+
+  try {
+    const response = await fetch('https://api.elevenlabs.io/v1/music', {
+      method: 'POST',
+      headers: {
+        'xi-api-key': apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(compositionPlan),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[ElevenLabs] Music V2 generation failed (Status ${response.status}):`, errorText);
+      return null;
+    }
+
+    const buffer = await response.arrayBuffer();
+    const fileName = `song-${id}-${Date.now()}.mp3`;
+    const soundsDir = path.join(process.cwd(), 'public', 'sounds');
+    
+    if (!fs.existsSync(soundsDir)) {
+      fs.mkdirSync(soundsDir, { recursive: true });
+    }
+
+    const filePath = path.join(soundsDir, fileName);
+    fs.writeFileSync(filePath, Buffer.from(buffer));
+    
+    return `/sounds/${fileName}`;
+  } catch (error) {
+    console.error('Error in generateMusicV2:', error);
     return null;
   }
 }
