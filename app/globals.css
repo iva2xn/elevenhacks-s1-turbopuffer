@@ -1,15 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
 
 :root {
-  --background: #050508;
-  --foreground: #f0f0f5;
-  --card-bg: rgba(255, 255, 255, 0.05);
-  --card-border: rgba(255, 255, 255, 0.1);
-  --accent: #8b5cf6;
-  --accent-glow: rgba(139, 92, 246, 0.3);
+  --background: #F8F4EE; /* Light Parchment */
+  --foreground: #2D1E17; /* Dark Coffee Text */
+  --card-bg: rgba(215, 204, 200, 0.3);
+  --card-border: rgba(62, 39, 35, 0.1);
+  --accent: #8D6E63;
+  --accent-glow: rgba(141, 110, 99, 0.2);
   --sidebar-width: 320px;
-  --sidebar-bg: rgba(10, 10, 15, 0.8);
-  --canvas-bg: radial-gradient(circle at center, #10101a 0%, #050508 100%);
+  --sidebar-bg: #EFEBE9; /* Soft Beige Sidebar */
+  --canvas-bg: radial-gradient(circle at center, #FDFCFB 0%, #F8F4EE 100%);
+  --text-soft: #3E2723;
   
   --font-main: 'Outfit', sans-serif;
   --font-serif: 'Playfair Display', serif;

@@ -9,13 +9,6 @@ export async function getCachedCombination(elementA: string, elementB: string): 
 
   const key = [elementA, elementB].sort().join('+');
   
-  // Minimal local cache just for instant feedback on base items
-  const localCache: Record<string, Element> = {
-    'Fire+Water': { id: 'steam', name: 'Steam', description: 'Hot vapor from boiling water.', emoji: '♨️' },
-  };
-
-  if (localCache[key]) return localCache[key];
-
   try {
     const response = await fetch(`https://api.turbopuffer.com/v1/vectors/${NAMESPACE}/query`, {
       method: 'POST',
@@ -25,7 +18,7 @@ export async function getCachedCombination(elementA: string, elementB: string): 
       },
       body: JSON.stringify({
         filters: ['id', 'Eq', key],
-        include_attributes: ['name', 'description', 'emoji', 'svg', 'sound', 'discoveredAt']
+        include_attributes: ['name', 'description', 'emoji', 'svg', 'sound', 'explanationSong', 'discoveredAt']
       }),
     });
 
@@ -47,6 +40,7 @@ export async function getCachedCombination(elementA: string, elementB: string): 
         emoji: getVal(attr.emoji),
         svg: getVal(attr.svg),
         sound: getVal(attr.sound),
+        explanationSong: getVal(attr.explanationSong),
         discoveredAt: getVal(attr.discoveredAt)
       };
     }
@@ -81,6 +75,7 @@ export async function saveCombination(elementA: string, elementB: string, result
           emoji: [result.emoji || ''],
           svg: [result.svg || ''],
           sound: [result.sound || ''],
+          explanationSong: [result.explanationSong || ''],
           discoveredAt: [result.discoveredAt || Date.now()]
         }
       }),

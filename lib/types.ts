@@ -6,6 +6,7 @@ export interface Element {
   emoji?: string;
   svg?: string;
   sound?: string;
+  explanationSong?: string;
   isBase?: boolean;
   discoveredAt?: number;
 }

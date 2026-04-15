@@ -15,15 +15,14 @@
 
 .title {
   font-size: 1.75rem;
-  background: linear-gradient(135deg, #fff 0%, #a5a5e0 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--foreground);
   margin-bottom: 0.25rem;
 }
 
 .subtitle {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--foreground);
+  opacity: 0.6;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -91,7 +90,7 @@
 .itemName {
   font-size: 0.65rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--foreground);
   text-align: center;
   width: 100%;
   overflow: hidden;
