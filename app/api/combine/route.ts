@@ -38,9 +38,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 4. Save to cache
-    await saveCombination(elementA, elementB, newElement);
+    // 4. Background: Save to cache (fire and forget)
+    saveCombination(elementA, elementB, newElement).catch(e => 
+      console.error('Background save failed:', e)
+    );
 
+    // Return once sound is ready
     return NextResponse.json({ result: newElement, cached: false });
   } catch (error) {
     console.error('Combination error:', error);

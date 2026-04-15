@@ -6,6 +6,12 @@
   background: transparent;
 }
 
+@media (max-width: 768px) {
+  .canvas {
+    height: calc(100vh - 140px);
+  }
+}
+
 .backgroundText {
   position: absolute;
   top: 50%;

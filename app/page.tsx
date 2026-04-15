@@ -15,6 +15,23 @@ const FUN_FACTS = [
   "A bolt of lightning is five times hotter than the sun's surface."
 ];
 
+function TypewriterText({ text }: { text: string }) {
+  const [displayedText, setDisplayedText] = useState('');
+  
+  useEffect(() => {
+    setDisplayedText('');
+    let i = 0;
+    const timeout = setInterval(() => {
+      setDisplayedText(text.slice(0, i + 1));
+      i++;
+      if (i >= text.length) clearInterval(timeout);
+    }, 30);
+    return () => clearInterval(timeout);
+  }, [text]);
+
+  return <>{displayedText}</>;
+}
+
 export default function Home() {
   const [discovered, setDiscovered] = useState<Element[]>([]);
   const [activeElements, setActiveElements] = useState<CanvasElement[]>([]);
@@ -33,6 +50,13 @@ export default function Home() {
   }, [isCombining]);
 
   const handleAddElement = (element: Element) => {
+    // Play element sound if available
+    if (element.sound) {
+      const audio = new Audio(element.sound);
+      audio.volume = 0.4;
+      audio.play().catch(() => {});
+    }
+
     const newInstance: CanvasElement = {
       ...element,
       instanceId: Math.random().toString(36).substr(2, 9),
@@ -148,14 +172,16 @@ export default function Home() {
       {isCombining && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'rgba(27, 20, 17, 0.9)', zIndex: 100, display: 'flex',
+          background: 'rgba(27, 20, 17, 0.9)', zIndex: 1000, display: 'flex',
           flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff',
-          textAlign: 'center', padding: '2rem', backdropFilter: 'blur(8px)'
+          textAlign: 'center', padding: '2rem', backdropFilter: 'blur(8px)',
+          animation: 'fadeIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards'
         }}>
-          <div className="loader" style={{ marginBottom: '2rem' }}></div>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.5rem', marginBottom: '1rem', color: 'var(--accent)' }}>Transmuting...</h2>
-          <p style={{ maxWidth: '600px', fontSize: '1.2rem', fontStyle: 'italic', opacity: 0.9, lineHeight: 1.6 }}>
-            "{currentFact}"
+          <p style={{ 
+            maxWidth: '600px', fontSize: '1.5rem', fontStyle: 'italic', 
+            opacity: 0.8, lineHeight: 1.6, fontFamily: 'var(--font-serif)'
+          }}>
+            "<TypewriterText text={currentFact} />"
           </p>
         </div>
       )}
@@ -164,14 +190,16 @@ export default function Home() {
       {discoveryElement && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'rgba(27, 20, 17, 0.95)', zIndex: 110, display: 'flex',
+          background: 'rgba(27, 20, 17, 0.95)', zIndex: 1100, display: 'flex',
           flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          animation: 'fadeIn 0.5s ease', backdropFilter: 'blur(10px)'
+          animation: 'fadeIn 0.5s ease', backdropFilter: 'blur(10px)',
+          padding: '1rem'
         }}>
           <div style={{
-            width: '320px', height: '320px', marginBottom: '3rem',
+            maxWidth: '320px', width: '80%', aspectRatio: '1/1', marginBottom: '2rem',
             animation: 'popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-            filter: 'drop-shadow(0 0 30px var(--accent-glow))'
+            filter: 'drop-shadow(0 0 30px var(--accent-glow))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
              {discoveryElement.emoji ? (
                 <span style={{ fontSize: '12rem', display: 'block', textAlign: 'center' }}>{discoveryElement.emoji}</span>
@@ -241,20 +269,10 @@ export default function Home() {
 
       <style jsx global>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
         @keyframes popIn { 
           0% { transform: scale(0.5); opacity: 0; } 
           100% { transform: scale(1); opacity: 1; } 
-        }
-        .loader {
-          width: 50px;
-          height: 10px;
-          background: var(--accent);
-          border-radius: 5px;
-          animation: pulse 1s infinite alternate;
-        }
-        @keyframes pulse {
-          from { transform: scaleX(0.5); opacity: 0.5; }
-          to { transform: scaleX(1.5); opacity: 1; }
         }
       `}</style>
     </main>

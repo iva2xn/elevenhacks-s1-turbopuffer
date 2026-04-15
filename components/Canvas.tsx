@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Element, CanvasElement, BASE_ELEMENTS } from '@/lib/types';
 import styles from './Canvas.module.css';
 
@@ -14,29 +14,58 @@ interface CanvasProps {
 export default function Canvas({ activeElements, discovered, setActiveElements, onCombine }: CanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [draggingInstance, setDraggingInstance] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+  const handlePointerDown = (e: React.PointerEvent, el: CanvasElement) => {
+    e.preventDefault();
+    setDraggingInstance(el.instanceId);
+    
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (rect) {
+      setDragOffset({
+        x: e.clientX - rect.left - el.x,
+        y: e.clientY - rect.top - el.y
+      });
+    }
+    
+    // Set pointer capture to track the drag even if it leaves the element
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!draggingInstance || !canvasRef.current) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const newX = e.clientX - rect.left - dragOffset.x;
+    const newY = e.clientY - rect.top - dragOffset.y;
+
+    setActiveElements(prev => prev.map(el => 
+      el.instanceId === draggingInstance ? { ...el, x: newX, y: newY } : el
+    ));
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!draggingInstance) return;
+
+    const moved = activeElements.find(el => el.instanceId === draggingInstance);
+    if (moved) {
+      checkCollisions(moved, moved.x, moved.y);
+    }
+    
+    setDraggingInstance(null);
+  };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     if (!canvasRef.current) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - 40; // Center offset
+    const x = e.clientX - rect.left - 40; 
     const y = e.clientY - rect.top - 40;
 
     const elementId = e.dataTransfer.getData('elementId');
-    const sourceInstanceId = e.dataTransfer.getData('instanceId');
 
-    if (sourceInstanceId) {
-      // Existing element moved
-      const moved = activeElements.find(el => el.instanceId === sourceInstanceId);
-      if (moved) {
-        setActiveElements(prev => prev.map(el => 
-          el.instanceId === sourceInstanceId ? { ...el, x, y } : el
-        ));
-        checkCollisions(moved, x, y);
-      }
-    } else if (elementId) {
-      // New element added from sidebar
+    if (elementId) {
       const allPossible = [...BASE_ELEMENTS, ...discovered];
       const foundEl = allPossible.find(el => el.id === elementId);
       if (foundEl) {
@@ -57,7 +86,7 @@ export default function Canvas({ activeElements, discovered, setActiveElements, 
       if (other.instanceId === moved.instanceId) return;
 
       const dist = Math.sqrt(Math.pow(x - other.x, 2) + Math.pow(y - other.y, 2));
-      if (dist < 70) { // Collision threshold increased
+      if (dist < 80) { // Slightly larger threshold for better mobile feel
         onCombine(moved, other);
       }
     });
@@ -65,7 +94,6 @@ export default function Canvas({ activeElements, discovered, setActiveElements, 
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
   };
 
   return (
@@ -74,9 +102,10 @@ export default function Canvas({ activeElements, discovered, setActiveElements, 
       ref={canvasRef}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
+      onPointerMove={handlePointerMove}
     >
       <div className={styles.backgroundText}>
-        Combine the elements to discover secrets...
+        Combine elements to discover secrets...
       </div>
       
        {activeElements.map((el) => (
@@ -85,20 +114,11 @@ export default function Canvas({ activeElements, discovered, setActiveElements, 
           className={styles.element}
           style={{ 
             transform: `translate(${el.x}px, ${el.y}px)`,
-            opacity: draggingInstance === el.instanceId ? 0 : 1,
-            pointerEvents: draggingInstance === el.instanceId ? 'none' : 'auto'
+            zIndex: draggingInstance === el.instanceId ? 100 : 1,
+            touchAction: 'none' // CRITICAL for mobile dragging
           }}
-          draggable
-          onDragStart={(e) => {
-            e.dataTransfer.setData('instanceId', el.instanceId);
-            setDraggingInstance(el.instanceId);
-            // Use a custom drag image to avoid the "ghosting" look of the whole div
-            const icon = e.currentTarget.querySelector(`.${styles.elementIcon}`);
-            if (icon) {
-              e.dataTransfer.setDragImage(icon, 32, 32);
-            }
-          } }
-          onDragEnd={() => setDraggingInstance(null)}
+          onPointerDown={(e) => handlePointerDown(e, el)}
+          onPointerUp={handlePointerUp}
           onDoubleClick={() => {
             setActiveElements(prev => prev.filter(item => item.instanceId !== el.instanceId));
           }}
@@ -117,7 +137,6 @@ export default function Canvas({ activeElements, discovered, setActiveElements, 
           </div>
         </div>
       ))}
-
     </div>
   );
 }

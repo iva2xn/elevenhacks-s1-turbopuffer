@@ -38,32 +38,31 @@ export async function generateCombination(
 ): Promise<Partial<Element> & { soundPrompt?: string }> {
   const usedList = usedIcons.length > 0 ? usedIcons.join(', ') : 'none';
 
-  const prompt = `You are a master of alchemy and a world-class SVG artist. You MUST ALWAYS produce a result.
+  const prompt = `You are a legendary alchemist and world-class SVG artisan. 
+  TASK: Synthesize a LIKELY and LOGICAL discovery from combining "${elementA}" and "${elementB}".
+  
+  LOGIC RULE: The result MUST make sense. Do not use overly 'epic' or 'gamey' names like 'Aether-Mist Prism'. 
+  Think: What would literally happen if these two things collided or were mixed?
+  Example: Fire + Water -> Steam (NOT 'Aqua-Flare Essence'). Earth + Fire -> Magma.
 
-TASK: Combine "${elementA}" and "${elementB}" into a new element.
+  VISUAL CONSTRAINTS (MANDATORY):
+  1. EMOJI: Choose a fitting emoji. IF THE EMOJI IS IN THIS LIST: [${usedList}], IT IS STRICTLY FORBIDDEN to use it. In that case, you MUST set "emoji" to null and provide a full SVG.
+  2. SVG (CRITICAL): If you cannot provide a NEW emoji, you MUST generate a high-fidelity SVG.
+     - Style: 3D glossy, glassmorphic, vibrant colors, mystical.
+     - Technical: viewBox="0 0 64 64". Use <defs>, <linearGradient>, and <filter id="glow">.
+     - Depth: Use layered <path> and <circle> elements.
+     - No placeholders. No simple shapes. Make it look like a unique artifact.
 
-VISUAL RULES:
-1. Pick a perfect emoji. If the best emoji is in [${usedList}], you MUST return null for emoji and generate an SVG.
-2. SVG GENERATION (The Goal is PRECISE HIGH-FIDELITY ART):
-   - Use viewBox="0 0 64 64".
-   - MUST use <defs> with <linearGradient> and <radialGradient>.
-   - MUST use overlapping <path> or <circle> elements to create depth.
-   - Use <filter id="glow"><feGaussianBlur stdDeviation="1.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>.
-   - Design: 3D glossy style, vibrant saturation, and alchemical mystical vibes.
-   - Make it look like a high-end, rare game asset.
+  AUDIO: Provide a Minecraft-themed sound prompt description.
 
-AUDIO RULES:
-1. Provide a "soundPrompt" for a sound effect. It MUST be Minecraft-themed. 
-   Examples: "Minecraft-style block breaking", "8-bit water splash", "Retro pixelated fire crackle".
-
-RESPOND WITH THIS EXACT JSON FORMAT:
-{
-  "name": "New Element Name",
-  "description": "One-line poetic description",
-  "emoji": "character OR null",
-  "svg": "full <svg>...</svg> string OR null",
-  "soundPrompt": "Description of the Minecraft-themed sound"
-}`;
+  RESPONSE (VALID JSON ONLY):
+  {
+    "name": "Logical Result Name",
+    "description": "Short poetic line",
+    "emoji": "character OR null",
+    "svg": "full <svg>...</svg> string OR null",
+    "soundPrompt": "Minecraft sound description"
+  }`;
 
   try {
     const response = await ai.models.generateContent({
@@ -94,9 +93,19 @@ RESPOND WITH THIS EXACT JSON FORMAT:
       finalEmoji = undefined;
     }
 
-    // If both are null, force a simple circle SVG so we don't have an empty icon
+    // FORCE SVG if emoji is missing
     if (!finalEmoji && !finalSvg) {
-      finalSvg = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="28" fill="url(#grad)"/><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" /><stop offset="100%" style="stop-color:#4c1d95;stop-opacity:1" /></linearGradient></defs></svg>`;
+      finalSvg = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="essenceGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#8D6E63;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#2D1E17;stop-opacity:1" />
+          </radialGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <circle cx="32" cy="32" r="24" fill="url(#essenceGrad)" filter="url(#glow)"/>
+        <path d="M32 12 L38 28 L54 32 L38 36 L32 52 L26 36 L10 32 L26 28 Z" fill="rgba(255,255,255,0.2)" />
+      </svg>`;
     }
 
     return {
