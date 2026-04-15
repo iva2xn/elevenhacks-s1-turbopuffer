@@ -6,9 +6,10 @@ import styles from './Sidebar.module.css';
 interface SidebarProps {
   discovered: Element[];
   onAddElement: (element: Element) => void;
+  onDeleteElement?: (id: string) => void;
 }
 
-export default function Sidebar({ discovered, onAddElement }: SidebarProps) {
+export default function Sidebar({ discovered, onAddElement, onDeleteElement }: SidebarProps) {
   const allIDs = new Set();
   const allElements = [...BASE_ELEMENTS, ...discovered].filter(el => {
     if (allIDs.has(el.id)) return false;
@@ -28,7 +29,13 @@ export default function Sidebar({ discovered, onAddElement }: SidebarProps) {
           <div 
             key={el.id} 
             className={styles.item}
-            onClick={() => onAddElement(el)}
+            onClick={(e) => {
+              if (e.shiftKey && onDeleteElement) {
+                onDeleteElement(el.id);
+              } else {
+                onAddElement(el);
+              }
+            }}
             draggable
             onDragStart={(e) => {
               e.dataTransfer.setData('elementId', el.id);

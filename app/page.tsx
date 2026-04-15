@@ -68,6 +68,7 @@ export default function Home() {
 
   const handleCombine = async (el1: CanvasElement, el2: CanvasElement) => {
     setIsCombining(true);
+    const startTime = Date.now();
     setCurrentFact(FUN_FACTS[Math.floor(Math.random() * FUN_FACTS.length)]);
 
     try {
@@ -121,6 +122,10 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to combine:', error);
     } finally {
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 3000) {
+        await new Promise(r => setTimeout(r, 3000 - elapsed));
+      }
       setIsCombining(false);
     }
   };
@@ -155,11 +160,30 @@ export default function Home() {
     }
   };
 
+  const handleDeleteElement = async (id: string) => {
+    if (!confirm('Permanently delete this discovery from the database?')) return;
+    
+    // Remove from local state
+    setDiscovered(prev => prev.filter(el => el.id !== id));
+    setActiveElements(prev => prev.filter(el => el.id !== id));
+
+    try {
+      await fetch('/api/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+    } catch (error) {
+      console.error('Failed to delete:', error);
+    }
+  };
+
   return (
     <main style={{ display: 'flex', height: '100vh', width: '100vw', background: 'var(--background)' }}>
       <Sidebar
         discovered={discovered}
         onAddElement={handleAddElement}
+        onDeleteElement={handleDeleteElement}
       />
       <Canvas
         activeElements={activeElements}
@@ -175,11 +199,12 @@ export default function Home() {
           background: 'rgba(27, 20, 17, 0.9)', zIndex: 1000, display: 'flex',
           flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff',
           textAlign: 'center', padding: '2rem', backdropFilter: 'blur(8px)',
-          animation: 'fadeIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards'
+          animation: 'fadeIn 0.3s ease'
         }}>
           <p style={{ 
             maxWidth: '600px', fontSize: '1.5rem', fontStyle: 'italic', 
-            opacity: 0.8, lineHeight: 1.6, fontFamily: 'var(--font-serif)'
+            opacity: 0.8, lineHeight: 1.6, fontFamily: 'var(--font-serif)',
+            animation: 'fadeOut 0.5s ease 2.5s forwards'
           }}>
             "<TypewriterText text={currentFact} />"
           </p>

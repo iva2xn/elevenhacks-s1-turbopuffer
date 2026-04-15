@@ -18,7 +18,7 @@ export async function getCachedCombination(elementA: string, elementB: string): 
       },
       body: JSON.stringify({
         filters: ['id', 'Eq', key],
-        include_attributes: ['name', 'description', 'emoji', 'svg', 'sound', 'explanationSong', 'discoveredAt']
+        include_attributes: ['name', 'description', 'emoji', 'svg', 'sound', 'soundPrompt', 'explanationSong', 'discoveredAt']
       }),
     });
 
@@ -40,9 +40,10 @@ export async function getCachedCombination(elementA: string, elementB: string): 
         emoji: getVal(attr.emoji),
         svg: getVal(attr.svg),
         sound: getVal(attr.sound),
+        soundPrompt: getVal(attr.soundPrompt),
         explanationSong: getVal(attr.explanationSong),
         discoveredAt: getVal(attr.discoveredAt)
-      };
+      } as Element;
     }
   } catch (error) {
     console.error('Error fetching from Turbopuffer:', error);
@@ -75,6 +76,7 @@ export async function saveCombination(elementA: string, elementB: string, result
           emoji: [result.emoji || ''],
           svg: [result.svg || ''],
           sound: [result.sound || ''],
+          soundPrompt: [(result as any).soundPrompt || ''],
           explanationSong: [result.explanationSong || ''],
           discoveredAt: [result.discoveredAt || Date.now()]
         }

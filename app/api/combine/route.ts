@@ -15,6 +15,18 @@ export async function POST(req: NextRequest) {
     // 1. Check cache
     const cached = await getCachedCombination(elementA, elementB);
     if (cached) {
+      // JIT Audio: If sound is missing but soundPrompt exists, generate it now
+      if (!cached.sound && (cached as any).soundPrompt) {
+        console.log(`[JIT Audio] Generating sound for cached element: ${cached.name}`);
+        const soundUrl = await generateSound(cached.id, (cached as any).soundPrompt);
+        if (soundUrl) {
+          cached.sound = soundUrl;
+          // Update the cache with the newly generated sound (background)
+          saveCombination(elementA, elementB, cached).catch(e => 
+            console.error('Failed to update JIT sound in cache:', e)
+          );
+        }
+      }
       return NextResponse.json({ result: cached, cached: true });
     }
 
@@ -39,11 +51,13 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Background: Save to cache (fire and forget)
-    saveCombination(elementA, elementB, newElement).catch(e => 
+    saveCombination(elementA, elementB, { 
+      ...newElement, 
+      soundPrompt: generated.soundPrompt 
+    } as any).catch(e => 
       console.error('Background save failed:', e)
     );
 
-    // Return once sound is ready
     return NextResponse.json({ result: newElement, cached: false });
   } catch (error) {
     console.error('Combination error:', error);
