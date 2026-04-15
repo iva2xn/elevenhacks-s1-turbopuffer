@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateCombination } from '@/lib/ai';
-import { saveCombination } from '@/lib/db';
+import { getCachedCombination, saveCombination } from '@/lib/db';
 
 const SEED_LIST = [
   // TIER 1: THE CORE FUSIONS
@@ -140,7 +140,93 @@ const SEED_LIST = [
   { a: 'Magic', b: 'Stone', name: 'Crystal Ball', emoji: '🔮', prompt: 'Mystical glass hum' },
   { a: 'History', b: 'Time', name: 'Past', emoji: '🏺', prompt: 'Dusty stone shuffle' },
   { a: 'World', b: 'Magic', name: 'Alchemy Quest', emoji: '🧙‍♂️', prompt: 'Level up jingle' },
+  
+  // TIER 8: SOCIETY & CONCEPTS
+  { a: 'Human', b: 'Money', name: 'Merchant', emoji: '🧑‍💼', prompt: 'Coin purse rattle' },
+  { a: 'Human', b: 'Law', name: 'Judge', emoji: '🧑‍⚖️', prompt: 'Gavel pound' },
+  { a: 'Human', b: 'Knowledge', name: 'Scientist', emoji: '🧑‍🔬', prompt: 'Liquid bubbling in glass' },
+  { a: 'Human', b: 'Art', name: 'Masterpiece', emoji: '🖼️', prompt: 'Angelic choir note' },
+  { a: 'Village', b: 'Wall', name: 'Fortress', emoji: '🏰', prompt: 'Heavy horn blast' },
+  { a: 'City', b: 'Energy', name: 'Metropolis', emoji: '🏙️', prompt: 'Distant siren and traffic' },
+  { a: 'Internet', b: 'Money', name: 'Bitcoin', emoji: '🪙', prompt: 'Digital coin chink' },
+  { a: 'Internet', b: 'Human', name: 'Social Media', emoji: '📱', prompt: 'Multi-device notification chirp' },
+  { a: 'Knowledge', b: 'Computer', name: 'Wikipedia', emoji: '📚', prompt: 'Paper page flip digital' },
+  { a: 'Time', b: 'History', name: 'Library', emoji: '🏛️', prompt: 'Echoing hall silence' },
+  { a: 'Money', b: 'Money', name: 'Bank', emoji: '🏦', prompt: 'Heavy vault door closing' },
+  { a: 'Bank', b: 'Internet', name: 'Fintech', emoji: '💳', prompt: 'Credit card swipe beep' },
+
+  // TIER 9: FOOD & CUISINE
+  { a: 'Fire', b: 'Plant', name: 'Tobacco', emoji: '🚬', prompt: 'Deep slow exhale' },
+  { a: 'Plant', b: 'Sun', name: 'Fruit', emoji: '🍎', prompt: 'Crisp bite crunch' },
+  { a: 'Fruit', b: 'Fire', name: 'Jam', emoji: '🍯', prompt: 'Sticky jar opening' },
+  { a: 'Tree', b: 'Fire', name: 'Charcoal', emoji: '🪵', prompt: 'Dry wood snap' },
+  { a: 'Fruit', b: 'Time', name: 'Wine', emoji: '🍷', prompt: 'Cork pop' },
+  { a: 'Wine', b: 'Fire', name: 'Vinegar', emoji: '🧪', prompt: 'Sharp acidic hiss' },
+  { a: 'Fruit', b: 'Cold', name: 'Smoothie', emoji: '🥤', prompt: 'Blender whir' },
+  { a: 'Milk', b: 'Cold', name: 'Ice Cream', emoji: '🍦', prompt: 'Sweet soft chime' },
+  { a: 'Milk', b: 'Time', name: 'Cheese', emoji: '🧀', prompt: 'Dense knife cut' },
+  { a: 'Dough', b: 'Cheese', name: 'Pizza', emoji: '🍕', prompt: 'Italian accordion chord' },
+  { a: 'Meat', b: 'Fire', name: 'Steak', emoji: '🥩', prompt: 'Sizzling grill hiss' },
+  { a: 'Steak', b: 'Bread', name: 'Burger', emoji: '🍔', prompt: 'Satisfying bite sound' },
+  { a: 'Fish', b: 'Rice', name: 'Sushi', emoji: '🍣', prompt: 'Soft chopstick click' },
+  { a: 'Water', b: 'Plant', name: 'Tea', emoji: '🍵', prompt: 'Hot water pour' },
+  { a: 'Seed', b: 'Fire', name: 'Coffee', emoji: '☕', prompt: 'Espresso machine hiss' },
+
+  // TIER 10: MYTHOLOGY & FANTASY
+  { a: 'Human', b: 'Death', name: 'Ghost', emoji: '👻', prompt: 'Eerie low whistle' },
+  { a: 'Ghost', b: 'Earth', name: 'Zombie', emoji: '🧟', prompt: 'Gravelly groan' },
+  { a: 'Human', b: 'Blood', name: 'Vampire', emoji: '🧛', prompt: 'Bat wing flutter' },
+  { a: 'Human', b: 'Moon', name: 'Werewolf', emoji: '🐺', prompt: 'Distance wolf howl' },
+  { a: 'Horse', b: 'Horn', name: 'Unicorn', emoji: '🦄', prompt: 'Magical sparkle neigh' },
+  { a: 'Bird', b: 'Fire', name: 'Phoenix', emoji: '🐦‍🔥', prompt: 'Flaring wing rush' },
+  { a: 'Lizard', b: 'Magic', name: 'Hydra', emoji: '🐍', prompt: 'Multi-head hiss' },
+  { a: 'Man', b: 'Horse', name: 'Centaur', emoji: '🐎', prompt: 'Galloping hoofbeats' },
+  { a: 'Man', b: 'Sea', name: 'Merman', emoji: '🧜‍♂️', prompt: 'Deep underwater splash' },
+  { a: 'Magic', b: 'Weaponry', name: 'Excalibur', emoji: '🗡️', prompt: 'Divine metal hum' },
+  { a: 'Magic', b: 'House', name: 'Wizard Tower', emoji: '🧙', prompt: 'Humming magical aura' },
+  { a: 'Magic', b: 'Ring', name: 'Artifact', emoji: '💍', prompt: 'Pulsing magic chime' },
+
+  // TIER 11: SPACE & COSMOS (EXPANDED)
+  { a: 'Rocket', b: 'Mars', name: 'Colony', emoji: '🏘️', prompt: 'Air-lock pressurization' },
+  { a: 'Star', b: 'Star', name: 'Binary System', emoji: '♊', prompt: 'Oscillating space hum' },
+  { a: 'Sun', b: 'Death', name: 'Red Giant', emoji: '🔴', prompt: 'Deep solar roar' },
+  { a: 'Red Giant', b: 'Death', name: 'Supernova', emoji: '🎆', prompt: 'Cataclysmic blast' },
+  { a: 'Star', b: 'Metal', name: 'Neutron Star', emoji: '💫', prompt: 'Rapid pulsar click' },
+  { a: 'Cosmos', b: 'Mind', name: 'Philosophy', emoji: '🧐', prompt: 'Reverberating thought' },
+  { a: 'Sun', b: 'Moon', name: 'Eclipse', emoji: '🌑', prompt: 'Ominous hush sound' },
+  { a: 'Earth', b: 'Sun', name: 'Orbit', emoji: '🔄', prompt: 'Cyclical celestial whir' },
+  { a: 'Alien', b: 'Human', name: 'First Contact', emoji: '🛸', prompt: 'Multi-tonal synth greeting' },
+
+  // TIER 12: EMOTIONS & ABSTRACTIONS
+  { a: 'Human', b: 'Human', name: 'Love', emoji: '❤️', prompt: 'Soft harp pluck' },
+  { a: 'Love', b: 'Time', name: 'Marriage', emoji: '💍', prompt: 'Wedding bell chime' },
+  { a: 'Love', b: 'Death', name: 'Tragedy', emoji: '🎭', prompt: 'Crying violin note' },
+  { a: 'Knowledge', b: 'Time', name: 'Wisdom', emoji: '👴', prompt: 'Deep resonant bell' },
+  { a: 'Energy', b: 'Mind', name: 'Idea', emoji: '💡', prompt: 'High pitch bleep' },
+  { a: 'Idea', b: 'Paper', name: 'Blueprint', emoji: '📜', prompt: 'Unrolling parchment' },
+  { a: 'Pressure', b: 'Mind', name: 'Stress', emoji: '😰', prompt: 'Ticking clock speed-up' },
+  { a: 'Music', b: 'Mind', name: 'Melody', emoji: '🎵', prompt: 'Short piano run' },
+  { a: 'Melody', b: 'Sound', name: 'Harmony', emoji: '🎶', prompt: 'Perfect chord swell' },
+  { a: 'Harmony', b: 'Chaos', name: 'Art', emoji: '🎨', prompt: 'Swishing paint stroke' },
+  { a: 'Chaos', b: 'Air', name: 'Storm', emoji: '🌪️', prompt: 'Howling wind gust' },
+  { a: 'Storm', b: 'Electricity', name: 'Lightning', emoji: '⚡', prompt: 'Sharp electric crack' },
+
+  // TIER 13: ELEMENTS & MINERALS
+  { a: 'Stone', b: 'Water', name: 'Erosion', emoji: '⏳', prompt: 'Sanding rock sound' },
+  { a: 'Sand', b: 'Time', name: 'Hourglass', emoji: '⌛', prompt: 'Dropping sand hiss' },
+  { a: 'Glass', b: 'Electricity', name: 'Fiber Optics', emoji: '🔦', prompt: 'High speed data pulse' },
+  { a: 'Metal', b: 'Air', name: 'Oxidation', emoji: '🧪', prompt: 'Slow rustling corrosion' },
+  { a: 'Carbon', b: 'Pressure', name: 'Diamond', emoji: '💎', prompt: 'Crystal glass clink' },
+  { a: 'Diamond', b: 'Metal', name: 'Jewelry', emoji: '💍', prompt: 'Sparkling metal chime' },
+  { a: 'Gold', b: 'Silver', name: 'Electrum', emoji: '📀', prompt: 'Dual metal resonance' },
+  { a: 'Metal', b: 'Carbon', name: 'Steel', emoji: '🔩', prompt: 'Solid industrial clang' },
+  { a: 'Steel', b: 'Electricity', name: 'Magnet', emoji: '🧲', prompt: 'Magnetic snap pull' },
+  { a: 'Magnet', b: 'Electricity', name: 'Motor', emoji: '⚙️', prompt: 'Spinning electric hum' },
+  { a: 'Motor', b: 'Tools', name: 'Robot', emoji: '🤖', prompt: 'Mechanical servo whir' },
+  { a: 'Robot', b: 'AI', name: 'Android', emoji: '👤', prompt: 'Synthetic human voice' },
 ];
+
+
 
 export async function GET(req: NextRequest) {
   const results = [];
@@ -153,6 +239,13 @@ export async function GET(req: NextRequest) {
     }
     usedEmojis.add(item.emoji);
 
+    // Check if already seeded
+    const existing = await getCachedCombination(item.a, item.b);
+    if (existing && existing.name === item.name) {
+      results.push(`Already seeded: ${item.name}`);
+      continue;
+    }
+
     try {
       const result = await generateCombination(item.a, item.b);
       result.name = item.name;
@@ -162,8 +255,8 @@ export async function GET(req: NextRequest) {
 
       await saveCombination(item.a, item.b, result as any);
       results.push(`Seeded ${item.name}`);
-      // Faster delay for large seed
-      await new Promise(r => setTimeout(r, 800));
+      // Slower delay for large seed to avoid hitting tight quotas
+      await new Promise(r => setTimeout(r, 3500));
     } catch (e: any) {
       results.push(`Failed ${item.name}: ${e.message}`);
     }

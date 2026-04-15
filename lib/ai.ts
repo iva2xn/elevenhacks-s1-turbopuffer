@@ -11,24 +11,35 @@ const ai = new GoogleGenAI({
 const MODEL_ID = 'gemini-3.1-flash-lite-preview';
 const EMBEDDING_MODEL_ID = 'text-embedding-004';
 
-export async function embedText(text: string): Promise<number[]> {
-  try {
-    const response = await ai.models.embedContent({
-      model: EMBEDDING_MODEL_ID,
-      contents: [{ parts: [{ text }] }],
-    });
-    
-    const values = response.embeddings?.[0]?.values;
-    if (!values) {
-      throw new Error('No embedding values returned from Gemini');
+export async function embedText(text: string, retries = 3): Promise<number[]> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await ai.models.embedContent({
+        model: EMBEDDING_MODEL_ID,
+        contents: [{ parts: [{ text }] }],
+      });
+      
+      const values = response.embeddings?.[0]?.values;
+      if (!values) {
+        throw new Error('No embedding values returned from Gemini');
+      }
+      
+      return values;
+    } catch (error: any) {
+      if (error.status === 429 && i < retries - 1) {
+        const wait = Math.pow(2, i) * 1000;
+        console.warn(`[Embedding] Rate limited. Retrying in ${wait}ms...`);
+        await new Promise(r => setTimeout(r, wait));
+        continue;
+      }
+      console.error('Embedding failed:', error);
+      if (i === retries - 1) {
+        // Fallback: return a zero vector of correct dimension (768 for text-embedding-004)
+        return new Array(768).fill(0);
+      }
     }
-    
-    return values;
-  } catch (error) {
-    console.error('Embedding failed:', error);
-    // Fallback: return a zero vector of correct dimension (768 for text-embedding-004)
-    return new Array(768).fill(0);
   }
+  return new Array(768).fill(0);
 }
 
 export async function generateCombination(

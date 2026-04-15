@@ -8,7 +8,7 @@ export async function getCachedCombination(elementA: string, elementB: string): 
   if (!TURBOPUFFER_API_KEY) return null;
 
   const key = [elementA, elementB].sort().join('+');
-  
+
   try {
     const response = await fetch(`https://api.turbopuffer.com/v1/vectors/${NAMESPACE}/query`, {
       method: 'POST',
@@ -30,7 +30,7 @@ export async function getCachedCombination(elementA: string, elementB: string): 
     if (data && data.length > 0) {
       const row = data[0];
       const attr = row.attributes || row;
-      
+
       const getVal = (v: any) => Array.isArray(v) ? v[0] : v;
 
       return {
@@ -56,7 +56,7 @@ export async function saveCombination(elementA: string, elementB: string, result
   if (!TURBOPUFFER_API_KEY) return;
 
   const key = [elementA, elementB].sort().join('+');
-  
+
   try {
     const vector = await embedText(`${result.name}: ${result.description}`);
 
