@@ -20,6 +20,13 @@ export async function generateSound(id: string, prompt: string): Promise<string 
     return `/sounds/${fileName}`;
   }
 
+  // Vercel / Serverless check: If we are in a read-only environment and the file doesn't exist, we can't write it.
+  const isVercel = process.env.VERCEL === '1';
+  if (isVercel) {
+    console.warn(`[ElevenLabs] Cannot write new sound ${fileName} to disk on Vercel at runtime. Suggest committing sounds to repo or using Vercel Blob.`);
+    return null; 
+  }
+
   console.log(`[ElevenLabs] Generating sound for: ${id} with prompt: ${prompt}`);
 
   try {
@@ -68,6 +75,11 @@ export async function generateMusic(id: string, prompt: string): Promise<string 
   if (fs.existsSync(filePath)) {
     console.log(`[ElevenLabs] Music already exists for: ${id}, skipping API call.`);
     return `/sounds/${fileName}`;
+  }
+
+  if (process.env.VERCEL === '1') {
+    console.warn(`[ElevenLabs] Cannot write music to disk on Vercel.`);
+    return null;
   }
 
   console.log(`[ElevenLabs] Generating music for: ${id} with prompt: ${prompt}`);
@@ -119,6 +131,11 @@ export async function generateMusicV2(id: string, compositionPlan: any): Promise
   if (fs.existsSync(filePath)) {
     console.log(`[ElevenLabs] Song already exists for: ${id}, skipping API call.`);
     return `/sounds/${fileName}`;
+  }
+
+  if (process.env.VERCEL === '1') {
+    console.warn(`[ElevenLabs] Cannot write song to disk on Vercel.`);
+    return null;
   }
 
   console.log(`[ElevenLabs] Generating full song for: ${id}`);

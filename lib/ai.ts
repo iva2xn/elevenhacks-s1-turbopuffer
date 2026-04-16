@@ -1,11 +1,24 @@
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
 import { Element } from './types';
+import fs from 'fs';
+import path from 'path';
 
-// The new SDK automatically uses GOOGLE_APPLICATION_CREDENTIALS from .env.local
+// Handle Google Cloud Auth for Vercel/Production
+if (process.env.GCP_SERVICE_ACCOUNT) {
+  const tempKeyPath = path.join('/tmp', 'gcp-key.json');
+  try {
+    fs.writeFileSync(tempKeyPath, process.env.GCP_SERVICE_ACCOUNT);
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = tempKeyPath;
+  } catch (e) {
+    console.error('Failed to write temporary GCP key:', e);
+  }
+}
+
 const ai = new GoogleGenAI({
   project: process.env.GOOGLE_CLOUD_PROJECT || 'live-agents-hackathon',
   location: process.env.GOOGLE_CLOUD_LOCATION || 'global',
-  vertexai: true,
+  apiKey: process.env.GEMINI_API_KEY,
+  vertexai: !!(process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_SERVICE_ACCOUNT),
 });
 
 const MODEL_ID = 'gemini-3.1-flash-lite-preview';
