@@ -1,6 +1,10 @@
 import { generateCombination } from '../lib/ai';
 import { saveCombination } from '../lib/db';
+import { generateSound } from '../lib/elevenlabs';
 import { BASE_ELEMENTS } from '../lib/types';
+import { loadEnvConfig } from '@next/env';
+
+loadEnvConfig(process.cwd());
 
 const SEED_LIST = [
   // TIER 1: THE CORE FUSIONS
@@ -151,6 +155,16 @@ const SEED_LIST = [
 
 async function seed() {
   console.log('Starting Alchemical Seeding...');
+  
+  // 0. Ensure sounds for BASE_ELEMENTS
+  console.log('--- Generating sounds for BASE_ELEMENTS ---');
+  for (const base of BASE_ELEMENTS) {
+    if (base.soundPrompt) {
+      console.log(`Checking sound for base element: ${base.name}`);
+      await generateSound(base.id, base.soundPrompt);
+    }
+  }
+
   const usedEmojis = new Set<string>();
   
   for (const item of SEED_LIST) {
@@ -170,8 +184,20 @@ async function seed() {
       result.discoveredAt = Date.now();
 
       await saveCombination(item.a, item.b, result as any);
+      
+      // GENERATE SOUND
+      if ((result as any).soundPrompt) {
+        console.log(`Generating sound for: ${item.name}`);
+        const soundUrl = await generateSound(result.id!, (result as any).soundPrompt);
+        if (soundUrl) {
+          result.sound = soundUrl;
+          // Re-save with sound URL
+          await saveCombination(item.a, item.b, result as any);
+        }
+      }
+
       console.log(`✅ Seeded ${item.name}`);
-      await new Promise(r => setTimeout(r, 1200));
+      await new Promise(r => setTimeout(r, 1500)); // slightly longer delay for multiple APIs
     } catch (e) {
       console.error(`❌ Failed to seed ${item.name}:`, e);
     }

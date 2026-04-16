@@ -14,12 +14,17 @@ if (process.env.GCP_SERVICE_ACCOUNT) {
   }
 }
 
-const ai = new GoogleGenAI({
-  project: process.env.GOOGLE_CLOUD_PROJECT || 'live-agents-hackathon',
-  location: process.env.GOOGLE_CLOUD_LOCATION || 'global',
-  apiKey: process.env.GEMINI_API_KEY,
-  vertexai: !!(process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_SERVICE_ACCOUNT),
-});
+// Decide between Vertex AI and Gemini API
+const aiOptions: any = {};
+if (process.env.GEMINI_API_KEY) {
+  aiOptions.apiKey = process.env.GEMINI_API_KEY;
+} else {
+  aiOptions.project = process.env.GOOGLE_CLOUD_PROJECT || 'live-agents-hackathon';
+  aiOptions.location = process.env.GOOGLE_CLOUD_LOCATION || 'global';
+  aiOptions.vertexai = true;
+}
+
+export const ai = new GoogleGenAI(aiOptions);
 
 const MODEL_ID = 'gemini-3.1-flash-lite-preview';
 const EMBEDDING_MODEL_ID = 'text-embedding-004';

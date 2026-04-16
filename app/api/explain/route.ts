@@ -1,15 +1,9 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { GoogleGenAI } from '@google/genai';
+import { ai } from '@/lib/ai';
 import { generateMusicV2 } from '@/lib/elevenlabs';
 import { getDiscoveryById, updateDiscovery } from '@/lib/db';
-
-const ai = new GoogleGenAI({
-  project: process.env.GOOGLE_CLOUD_PROJECT || 'live-agents-hackathon',
-  location: process.env.GOOGLE_CLOUD_LOCATION || 'global',
-  vertexai: true,
-});
 
 export async function POST(req: Request) {
   try {
