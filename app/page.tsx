@@ -192,12 +192,17 @@ export default function Home() {
     }
   };
 
-  const handleDeleteElement = async (id: string) => {
-    if (!confirm('Permanently delete this discovery from the database?')) return;
+  const handleDeleteElement = async (id: string, localOnly?: boolean) => {
+    // Only confirm and call API if NOT a local-only removal
+    if (!localOnly) {
+      if (!confirm('Permanently delete this discovery from the database?')) return;
+    }
     
-    // Remove from local state
+    // Remove from local state (Inventory and Canvas)
     setDiscovered(prev => prev.filter(el => el.id !== id));
     setActiveElements(prev => prev.filter(el => el.id !== id));
+
+    if (localOnly) return; // Exit here for local-only
 
     try {
       await fetch('/api/delete', {

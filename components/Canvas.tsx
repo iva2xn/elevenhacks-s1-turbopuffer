@@ -17,6 +17,13 @@ export default function Canvas({ activeElements, discovered, setActiveElements, 
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   const handlePointerDown = (e: React.PointerEvent, el: CanvasElement) => {
+    // Cmd + Click (or Ctrl + Click) to remove locally
+    if (e.metaKey || e.ctrlKey) {
+      e.preventDefault();
+      setActiveElements(prev => prev.filter(item => item.instanceId !== el.instanceId));
+      return;
+    }
+
     e.preventDefault();
     setDraggingInstance(el.instanceId);
     

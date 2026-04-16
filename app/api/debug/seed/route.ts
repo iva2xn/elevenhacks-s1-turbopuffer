@@ -20,6 +20,8 @@ const SEED_LIST = [
   { a: 'Stone', b: 'Air', name: 'Sand', emoji: '🏖️', prompt: 'Gravelly sand shift' },
   { a: 'Sand', b: 'Fire', name: 'Glass', emoji: '🥛', prompt: 'Sharp crystal chime' },
   { a: 'Metal', b: 'Fire', name: 'Tools', emoji: '🛠️', prompt: 'Industrial clanking' },
+  { a: 'Mud', b: 'Sand', name: 'Clay', emoji: '🏺', prompt: 'Wet earth squelch' },
+  { a: 'Metal', b: 'Magma', name: 'Liquid Metal', emoji: '🥄', prompt: 'Hissing molten metal' },
   { a: 'Stone', b: 'Stone', name: 'Pebble', emoji: '🔘', prompt: 'Tiny stone click' },
   { a: 'Water', b: 'Water', name: 'Puddle', emoji: '💧', prompt: 'Liquid drip splash' },
   { a: 'Puddle', b: 'Water', name: 'Lake', emoji: '🌊', prompt: 'Calm water ripple' },
@@ -33,6 +35,11 @@ const SEED_LIST = [
   { a: 'Computer', b: 'Mind', name: 'AI', emoji: '🤖', prompt: 'Electronic processing' },
   { a: 'Voice', b: 'AI', name: 'ElevenLabs', emoji: '🎙️', prompt: 'Smooth AI speech synthesis' },
   { a: 'Turbopuffer', b: 'ElevenLabs', name: 'Winner', emoji: '🏆', prompt: 'Golden victory fanfare' },
+  { a: 'Cloud', b: 'Air', name: 'Sky', emoji: '🌌', prompt: 'Vast open sky ambience' },
+  { a: 'Energy', b: 'Air', name: 'Sun', emoji: '☀️', prompt: 'Bright solar hum' },
+  { a: 'Sky', b: 'Stone', name: 'Moon', emoji: '🌙', prompt: 'Quiet lunar silence' },
+  { a: 'Sun', b: 'Sky', name: 'Daylight', emoji: '🌤️', prompt: 'Brinding morning birds' },
+  { a: 'Life', b: 'Energy', name: 'Mind', emoji: '💡', prompt: 'Spark of consciousness' },
 
   // TIER 2: NATURE & LIFE
   { a: 'Earth', b: 'Water', name: 'Plant', emoji: '🌱', prompt: 'Rustling leaves' },
@@ -68,7 +75,7 @@ const SEED_LIST = [
   { a: 'Glass', b: 'Sun', name: 'Lens', emoji: '🔍', prompt: 'Light focusing hum' },
   { a: 'Lens', b: 'Lens', name: 'Telescope', emoji: '🔭', prompt: 'Mechanical slide click' },
   { a: 'Lens', b: 'Glass', name: 'Spectacles', emoji: '👓', prompt: 'Folding glass click' },
-  { a: 'Metal', b: 'Fire', name: 'Bronze', emoji: '🪙', prompt: 'Solid metal resonance' },
+  { a: 'Liquid Metal', b: 'Clay', name: 'Bronze', emoji: '🪙', prompt: 'Solid metal resonance' },
   { a: 'Wood', b: 'Sea', name: 'Boat', emoji: '🛶', prompt: 'Wooden hull creak' },
   { a: 'Boat', b: 'Wood', name: 'Ship', emoji: '🚢', prompt: 'Deep fog horn' },
   { a: 'Ship', b: 'Metal', name: 'Steamship', emoji: '⛴️', prompt: 'Deep steam engine hum' },
@@ -140,7 +147,7 @@ const SEED_LIST = [
   { a: 'Magic', b: 'Stone', name: 'Crystal Ball', emoji: '🔮', prompt: 'Mystical glass hum' },
   { a: 'History', b: 'Time', name: 'Past', emoji: '🏺', prompt: 'Dusty stone shuffle' },
   { a: 'World', b: 'Magic', name: 'Alchemy Quest', emoji: '🧙‍♂️', prompt: 'Level up jingle' },
-  
+
   // TIER 8: SOCIETY & CONCEPTS
   { a: 'Human', b: 'Money', name: 'Merchant', emoji: '🧑‍💼', prompt: 'Coin purse rattle' },
   { a: 'Human', b: 'Law', name: 'Judge', emoji: '🧑‍⚖️', prompt: 'Gavel pound' },
@@ -231,7 +238,7 @@ const SEED_LIST = [
 export async function GET(req: NextRequest) {
   const results = [];
   const usedEmojis = new Set<string>();
-  
+
   for (const item of SEED_LIST) {
     if (usedEmojis.has(item.emoji)) {
       results.push(`Skipped duplicate emoji: ${item.emoji} for ${item.name}`);

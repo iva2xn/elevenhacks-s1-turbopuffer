@@ -25,10 +25,19 @@ const SEED_LIST = [
   { a: 'Lake', b: 'Water', name: 'Sea', emoji: '🗾', prompt: 'Ocean wave roll' },
   { a: 'Sea', b: 'Water', name: 'Ocean', emoji: '🌎', prompt: 'Deep sea ambience' },
 
+  // FOUNDATIONAL CELESTIALS
+  { a: 'Energy', b: 'Air', name: 'Sun', emoji: '☀️', prompt: 'Radiant cosmic hum' },
+  { a: 'Cloud', b: 'Air', name: 'Sky', emoji: '🌌', prompt: 'Open atmospheric resonance' },
+  { a: 'Sky', b: 'Stone', name: 'Moon', emoji: '🌙', prompt: 'Quiet lunar chime' },
+  { a: 'Life', b: 'Energy', name: 'Mind', emoji: '💡', prompt: 'Ethereal spark of thought' },
+
   // THE PLATFORM PATH (SPECIAL REQUEST)
+  { a: 'Sun', b: 'Sky', name: 'Daylight', emoji: '🌤️', prompt: 'Bright morning birdsong' },
+  { a: 'Daylight', b: 'Moon', name: 'Time', emoji: '⏳', prompt: 'Grandfather clock tick' },
   { a: 'Stone', b: 'Time', name: 'Memory', emoji: '🧠', prompt: 'Mystical brain hum' },
   { a: 'Cloud', b: 'Memory', name: 'Turbopuffer', emoji: '🐡', prompt: 'Digital vector pop' },
   { a: 'Human', b: 'Air', name: 'Voice', emoji: '🗣️', prompt: 'Human vocalization' },
+  { a: 'Cloud', b: 'Voice', name: 'Cloud Voice', emoji: '🌐', prompt: 'Echoing digital broadcast' },
   { a: 'Computer', b: 'Mind', name: 'AI', emoji: '🤖', prompt: 'Electronic processing' },
   { a: 'Voice', b: 'AI', name: 'ElevenLabs', emoji: '🎙️', prompt: 'Smooth AI speech synthesis' },
   { a: 'Turbopuffer', b: 'ElevenLabs', name: 'Winner', emoji: '🏆', prompt: 'Golden victory fanfare' },
@@ -99,7 +108,6 @@ const SEED_LIST = [
   { a: 'Tools', b: 'Energy', name: 'Computer', emoji: '💻', prompt: 'Modern server hum' },
   { a: 'Computer', b: 'Electricity', name: 'Internet', emoji: '🌐', prompt: 'Dial-up modem sounds' },
   { a: 'Computer', b: 'Tools', name: 'Smartphone', emoji: '📱', prompt: 'Digital notification ding' },
-  { a: 'Daylight', b: 'Moon', name: 'Time', emoji: '⏳', prompt: 'Grandfather clock tick' },
   { a: 'Time', b: 'Earth', name: 'Fossil', emoji: '🦴', prompt: 'Ancient rock crumble' },
 
   // TIER 5: LIFE & BIOLOGY

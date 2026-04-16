@@ -6,7 +6,7 @@ import styles from './Sidebar.module.css';
 interface SidebarProps {
   discovered: Element[];
   onAddElement: (element: Element) => void;
-  onDeleteElement?: (id: string) => void;
+  onDeleteElement?: (id: string, localOnly?: boolean) => void;
 }
 
 export default function Sidebar({ discovered, onAddElement, onDeleteElement }: SidebarProps) {
@@ -30,8 +30,13 @@ export default function Sidebar({ discovered, onAddElement, onDeleteElement }: S
             key={el.id} 
             className={styles.item}
             onClick={(e) => {
-              if (e.shiftKey && onDeleteElement) {
-                onDeleteElement(el.id);
+              // Cmd + Click (or Ctrl + Click) for local removal
+              if (e.metaKey || e.ctrlKey) {
+                if (onDeleteElement) {
+                  // We'll pass a flag later to indicate local-only if needed, 
+                  // but for now let's just use the modifier key as the signal.
+                  onDeleteElement(el.id, true); 
+                }
               } else {
                 onAddElement(el);
               }

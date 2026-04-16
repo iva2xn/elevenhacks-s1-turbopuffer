@@ -23,6 +23,7 @@ The path to victory is through the power of the platforms:
 7. 🌋 Magma + 💧 Water = 🪨 **Obsidian**
 8. 💨 Steam + 💨 Air = ⛅ **Cloud**
 9. 💩 Mud + 🔥 Fire = 🧱 **Brick**
+9b. 💩 Mud + 🏖️ Sand = 🏺 **Clay**
 10. 🌪️ Dust + 🔥 Fire = ⚱️ **Ash**
 11. ☁️ Mist + 💨 Air = 🌫️ **Fog**
 12. 🌍 Earth + 🌍 Earth = 💎 **Pressure**
@@ -35,15 +36,21 @@ The path to victory is through the power of the platforms:
 19. 💧 Puddle + 💧 Water = 🌊 **Lake**
 20. 🌊 Lake + 💧 Water = 🗾 **Sea**
 
-### Tier 2: The Tech Path (Specific Request)
+### Tier 2: The Foundational & Tech Path (Specific Request)
 21. 🌊 Sea + 💧 Water = 🌎 **Ocean**
-22. 🔩 Metal + ⚡ Energy = 🔌 **Electricity**
-23. 🧱 Stone + 🕰️ Time = 🧠 **Memory**
-24. ⛅ Cloud + 🧠 Memory = 🐡 **Turbopuffer**
-25. 🚶 Human + 💨 Air = 🗣️ **Voice**
-26. 💻 Computer + 🧠 Intelligence = 🤖 **AI**
-27. 🗣️ Voice + 🤖 AI = 🎙️ **ElevenLabs**
-28. 🐡 **Turbopuffer** + 🎙️ **ElevenLabs** = 🏆 **Winner**
+22. ⚡ Energy + 💨 Air = ☀️ **Sun**
+23. ⛅ Cloud + 💨 Air = 🌌 **Sky**
+24. 🌌 Sky + 🧱 Stone = 🌙 **Moon**
+25. ☀️ Sun + 🌌 Sky = 🌤️ **Daylight**
+26. 🌤️ Daylight + 🌙 Moon = ⏳ **Time**
+27. 🧱 Stone + ⏳ Time = 🧠 **Memory**
+28. ⛅ Cloud + 🧠 Memory = 🐡 **Turbopuffer**
+29. 🚶 Human + 💨 Air = 🗣️ **Voice**
+30. ⛅ Cloud + 🗣️ Voice = 🌐 **Cloud Voice**
+31. 🌱 Life + ⚡ Energy = 💡 **Mind**
+32. 💻 Computer + 💡 Mind = 🤖 **AI**
+33. 🗣️ Voice + 🤖 AI = 🎙️ **ElevenLabs**
+34. 🐡 **Turbopuffer** + 🎙️ **ElevenLabs** = 🏆 **Winner**
 
 ### Tier 3: Nature, Materials & Civilization (Ensuring Zero Duplicates)
 29. 🌍 Earth + 💧 Water = 🌱 **Plant**
@@ -88,7 +95,7 @@ The path to victory is through the power of the platforms:
 68. 🥛 Glass + ☀️ Sun = 🔍 **Lens**
 69. 🔍 Lens + 🔍 Lens = 🔭 **Telescope**
 70. 🔍 Lens + 🥛 Glass = 👓 **Spectacles**
-71. ☄️ Metal + 🔥 Fire = 🥄 **Liquid Metal**
+71. ☄️ Metal + 🌋 Magma = 🥄 **Liquid Metal**
 72. 🥄 Liquid Metal + 🏺 Clay = 🪙 **Bronze**
 73. 🪙 Bronze + 🛠️ Tools = 🛡️ **Shield**
 74. 🛡️ Shield + ☄️ Metal = 🛡️ **Armor**

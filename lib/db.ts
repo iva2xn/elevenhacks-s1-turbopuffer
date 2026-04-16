@@ -4,10 +4,8 @@ import { embedText } from './ai';
 const TURBOPUFFER_API_KEY = process.env.NEXT_PUBLIC_TURBOPUFFER_API_KEY;
 const NAMESPACE = 'alchemy-combinations';
 
-export async function getCachedCombination(elementA: string, elementB: string): Promise<Element | null> {
+export async function getDiscoveryById(id: string): Promise<Element | null> {
   if (!TURBOPUFFER_API_KEY) return null;
-
-  const key = [elementA, elementB].sort().join('+');
 
   try {
     const response = await fetch(`https://api.turbopuffer.com/v1/vectors/${NAMESPACE}/query`, {
@@ -17,7 +15,7 @@ export async function getCachedCombination(elementA: string, elementB: string): 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        filters: ['id', 'Eq', key],
+        filters: ['id', 'Eq', id],
         include_attributes: ['name', 'description', 'emoji', 'svg', 'sound', 'soundPrompt', 'explanationSong', 'discoveredAt']
       }),
     });
@@ -50,6 +48,11 @@ export async function getCachedCombination(elementA: string, elementB: string): 
   }
 
   return null;
+}
+
+export async function getCachedCombination(elementA: string, elementB: string): Promise<Element | null> {
+  const key = [elementA, elementB].sort().join('+');
+  return getDiscoveryById(key);
 }
 
 export async function saveCombination(elementA: string, elementB: string, result: Element) {
@@ -91,5 +94,42 @@ export async function saveCombination(elementA: string, elementB: string, result
     }
   } catch (error) {
     console.error('[Turbopuffer] Network error:', error);
+  }
+}
+
+export async function updateDiscovery(id: string, attributes: Partial<Element>) {
+  if (!TURBOPUFFER_API_KEY) return;
+
+  try {
+    const existing = await getDiscoveryById(id);
+    if (!existing) return;
+
+    const updated = { ...existing, ...attributes };
+    const vector = await embedText(`${updated.name}: ${updated.description}`);
+
+    await fetch(`https://api.turbopuffer.com/v1/vectors/${NAMESPACE}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${TURBOPUFFER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ids: [id],
+        vectors: [vector],
+        distance_metric: 'cosine_distance',
+        attributes: {
+          name: [updated.name],
+          description: [updated.description],
+          emoji: [updated.emoji || ''],
+          svg: [updated.svg || ''],
+          sound: [updated.sound || ''],
+          soundPrompt: [(updated as any).soundPrompt || ''],
+          explanationSong: [updated.explanationSong || ''],
+          discoveredAt: [updated.discoveredAt || Date.now()]
+        }
+      }),
+    });
+  } catch (error) {
+    console.error('[Turbopuffer] Update error:', error);
   }
 }

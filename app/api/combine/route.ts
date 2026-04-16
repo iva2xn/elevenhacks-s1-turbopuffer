@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 import { getCachedCombination, saveCombination } from '@/lib/db';
 import { generateCombination } from '@/lib/ai';
 import { generateSound } from '@/lib/elevenlabs';
@@ -15,8 +17,19 @@ export async function POST(req: NextRequest) {
     // 1. Check cache
     const cached = await getCachedCombination(elementA, elementB);
     if (cached) {
+      // Check if sound file actually exists on disk (if it's a local path)
+      let soundMissing = !cached.sound;
+      if (cached.sound && cached.sound.startsWith('/sounds/')) {
+        const filePath = path.join(process.cwd(), 'public', cached.sound);
+        if (!fs.existsSync(filePath)) {
+          console.log(`[Sound Missing] File not found at ${filePath}, force regenerating...`);
+          soundMissing = true;
+          cached.sound = ''; 
+        }
+      }
+
       // JIT Audio: If sound is missing but soundPrompt exists, generate it now
-      if (!cached.sound && (cached as any).soundPrompt) {
+      if (soundMissing && (cached as any).soundPrompt) {
         console.log(`[JIT Audio] Generating sound for cached element: ${cached.name}`);
         const soundUrl = await generateSound(cached.id, (cached as any).soundPrompt);
         if (soundUrl) {

@@ -8,6 +8,18 @@ export async function generateSound(id: string, prompt: string): Promise<string 
     return null;
   }
 
+  // Use a stable filename based on ID to avoid duplicates and allow caching
+  const safeId = id.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  const fileName = `${safeId}.mp3`;
+  const soundsDir = path.join(process.cwd(), 'public', 'sounds');
+  const filePath = path.join(soundsDir, fileName);
+
+  // Check if file already exists
+  if (fs.existsSync(filePath)) {
+    console.log(`[ElevenLabs] Sound already exists for: ${id}, skipping API call.`);
+    return `/sounds/${fileName}`;
+  }
+
   console.log(`[ElevenLabs] Generating sound for: ${id} with prompt: ${prompt}`);
 
   try {
@@ -31,14 +43,11 @@ export async function generateSound(id: string, prompt: string): Promise<string 
     }
 
     const buffer = await response.arrayBuffer();
-    const fileName = `${id}-${Date.now()}.mp3`;
-    const soundsDir = path.join(process.cwd(), 'public', 'sounds');
     
     if (!fs.existsSync(soundsDir)) {
       fs.mkdirSync(soundsDir, { recursive: true });
     }
 
-    const filePath = path.join(soundsDir, fileName);
     fs.writeFileSync(filePath, Buffer.from(buffer));
     
     return `/sounds/${fileName}`;
@@ -50,6 +59,16 @@ export async function generateSound(id: string, prompt: string): Promise<string 
 export async function generateMusic(id: string, prompt: string): Promise<string | null> {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (!apiKey) return null;
+
+  const safeId = id.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  const fileName = `music_${safeId}.mp3`;
+  const soundsDir = path.join(process.cwd(), 'public', 'sounds');
+  const filePath = path.join(soundsDir, fileName);
+
+  if (fs.existsSync(filePath)) {
+    console.log(`[ElevenLabs] Music already exists for: ${id}, skipping API call.`);
+    return `/sounds/${fileName}`;
+  }
 
   console.log(`[ElevenLabs] Generating music for: ${id} with prompt: ${prompt}`);
 
@@ -74,14 +93,11 @@ export async function generateMusic(id: string, prompt: string): Promise<string 
     }
 
     const buffer = await response.arrayBuffer();
-    const fileName = `music-${id}-${Date.now()}.mp3`;
-    const soundsDir = path.join(process.cwd(), 'public', 'sounds');
     
     if (!fs.existsSync(soundsDir)) {
       fs.mkdirSync(soundsDir, { recursive: true });
     }
 
-    const filePath = path.join(soundsDir, fileName);
     fs.writeFileSync(filePath, Buffer.from(buffer));
     
     return `/sounds/${fileName}`;
@@ -94,6 +110,16 @@ export async function generateMusic(id: string, prompt: string): Promise<string 
 export async function generateMusicV2(id: string, compositionPlan: any): Promise<string | null> {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (!apiKey) return null;
+
+  const safeId = id.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  const fileName = `song_${safeId}.mp3`;
+  const soundsDir = path.join(process.cwd(), 'public', 'sounds');
+  const filePath = path.join(soundsDir, fileName);
+
+  if (fs.existsSync(filePath)) {
+    console.log(`[ElevenLabs] Song already exists for: ${id}, skipping API call.`);
+    return `/sounds/${fileName}`;
+  }
 
   console.log(`[ElevenLabs] Generating full song for: ${id}`);
 
@@ -114,14 +140,11 @@ export async function generateMusicV2(id: string, compositionPlan: any): Promise
     }
 
     const buffer = await response.arrayBuffer();
-    const fileName = `song-${id}-${Date.now()}.mp3`;
-    const soundsDir = path.join(process.cwd(), 'public', 'sounds');
     
     if (!fs.existsSync(soundsDir)) {
       fs.mkdirSync(soundsDir, { recursive: true });
     }
 
-    const filePath = path.join(soundsDir, fileName);
     fs.writeFileSync(filePath, Buffer.from(buffer));
     
     return `/sounds/${fileName}`;

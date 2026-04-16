@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 import { GoogleGenAI } from '@google/genai';
 import { generateMusicV2 } from '@/lib/elevenlabs';
+import { getDiscoveryById, updateDiscovery } from '@/lib/db';
 
 const ai = new GoogleGenAI({
   project: process.env.GOOGLE_CLOUD_PROJECT || 'live-agents-hackathon',
@@ -13,6 +16,17 @@ export async function POST(req: Request) {
     const { elementId, name, description } = await req.json();
 
     console.log(`[Explain API] Crafting a musical explanation for: ${name}`);
+
+    // 1. Check if we already have a song in the database
+    const existing = await getDiscoveryById(elementId);
+    if (existing?.explanationSong) {
+      const filePath = path.join(process.cwd(), 'public', existing.explanationSong);
+      if (fs.existsSync(filePath)) {
+        console.log(`[Explain API] Using existing song for: ${name}`);
+        return NextResponse.json({ songUrl: existing.explanationSong, lyrics: 'Lyrics loaded from vault...' });
+      }
+      console.log(`[Explain API] Song found in DB but missing from disk. Regenerating...`);
+    }
 
     // 1. Ask Gemini to compose the song structure
     const prompt = `You are a mystical alchemical composer. 
@@ -69,6 +83,11 @@ export async function POST(req: Request) {
       console.error('[Explain API] Failed to generate music V2 URL');
       return NextResponse.json({ error: 'Failed to generate song' }, { status: 500 });
     }
+
+    // 3. Save to database (background)
+    updateDiscovery(elementId, { explanationSong: songUrl }).catch(e => 
+      console.error('[Explain API] Failed to update discovery with song:', e)
+    );
 
     console.log(`[Explain API] Full song discovery generated at: ${songUrl}`);
 
