@@ -17,10 +17,14 @@ if (process.env.GCP_SERVICE_ACCOUNT) {
 // Decide between Vertex AI and Gemini API
 const aiOptions: any = {};
 if (process.env.GEMINI_API_KEY) {
+  console.log('[AI] Using Gemini API Key');
   aiOptions.apiKey = process.env.GEMINI_API_KEY;
 } else {
-  aiOptions.project = process.env.GOOGLE_CLOUD_PROJECT || 'live-agents-hackathon';
-  aiOptions.location = process.env.GOOGLE_CLOUD_LOCATION || 'global';
+  const project = process.env.GOOGLE_CLOUD_PROJECT || 'live-agents-hackathon';
+  const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
+  console.log(`[AI] Using Vertex AI: project=${project}, location=${location}`);
+  aiOptions.project = project;
+  aiOptions.location = location;
   aiOptions.vertexai = true;
 }
 

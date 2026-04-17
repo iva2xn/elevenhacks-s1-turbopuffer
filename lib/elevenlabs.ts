@@ -72,6 +72,7 @@ export async function generateSound(id: string, prompt: string): Promise<string 
         const { url } = await put(`sounds/${fileName}`, Buffer.from(buffer), {
           access: 'public',
           contentType: 'audio/mpeg',
+          allowOverwrite: true,
         });
         console.log(`[ElevenLabs] Successfully uploaded to: ${url}`);
         return url;
@@ -155,6 +156,7 @@ export async function generateMusic(id: string, prompt: string): Promise<string 
         const { url } = await put(`sounds/${fileName}`, Buffer.from(buffer), {
           access: 'public',
           contentType: 'audio/mpeg',
+          allowOverwrite: true,
         });
         return url;
       }
@@ -231,6 +233,7 @@ export async function generateMusicV2(id: string, compositionPlan: any): Promise
         const { url } = await put(`sounds/${fileName}`, Buffer.from(buffer), {
           access: 'public',
           contentType: 'audio/mpeg',
+          allowOverwrite: true,
         });
         return url;
       }
